@@ -1,4 +1,4 @@
-//mod graphics;
+mod graphics;
 mod world;
 
 fn main() {

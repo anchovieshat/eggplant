@@ -1,14 +1,28 @@
+use std::cell::RefCell;
+use std::rc::Rc;
+
 trait Render {
     fn render(&mut self);
 }
 
+impl<T: Render> Render for Rc<RefCell<T>> {
+    fn render(&mut self) { self.borrow_mut().render(); }
+}
+
 trait Node : Render {
-    fn insert(&mut self, obj: Box<Node + 'static>);
-    fn remove<T: Node>(&mut self, obj: &T);
+    fn insert(&mut self, obj: Box<Node + 'static>) { }
+    fn find(&mut self, obj: &Node) -> Option<uint> { None }
+    fn remove(&mut self, idx: uint) { }
+}
+
+impl<T: Node> Node for Rc<RefCell<T>> {
+    fn insert(&mut self, obj: Box<Node + 'static>) { self.borrow_mut().insert(obj) }
+    fn find(&mut self, obj: &Node) -> Option<uint> { self.borrow_mut().find(obj) }
+    fn remove(&mut self, idx: uint) { self.borrow_mut().remove(idx) }
 }
 
 struct SceneGraph {
-    children: Vec<&'static Node+'static>,
+    children: Vec<Box<Node + 'static>>
 }
 
 impl SceneGraph {
@@ -24,15 +38,18 @@ impl Node for SceneGraph {
         self.children.push(obj);
     }
 
-    fn remove<T: Node>(&mut self, obj: &T) {
+    fn find(&mut self, obj: &Node) -> Option<uint> {
+        None
+    }
+
+    fn remove(&mut self, idx: uint) {
     }
 
 }
 
 impl Render for SceneGraph {
     fn render(&mut self) {
-        for child in self.children.iter() {
-            let ibox = *child;
+        for child in self.children.iter_mut() {
             child.render();
         }
     }
@@ -41,10 +58,11 @@ impl Render for SceneGraph {
 
 #[cfg(test)]
 mod test {
-    use super::{SceneGraph};
+    use super::{SceneGraph, Render, Node};
     use std::fmt::Show;
+    use std::cell::RefCell;
+    use std::rc::Rc;
 
-    #[deriving(Clone)]
     struct TestNode {
         rendered: bool,
     }
@@ -53,15 +71,17 @@ mod test {
         fn render(&mut self) { self.rendered = true; }
     }
 
+    impl Node for TestNode { }
+
     #[test]
     fn test_traversal() {
         let mut graph = SceneGraph::new();
-        let mut test_node = box TestNode { rendered: false };
+        let mut test_node = Rc::new(RefCell::new(TestNode { rendered: false }));
 
-        graph.insert(test_node.clone());
+        graph.insert(box test_node.clone());
 
         graph.render();
 
-        assert_eq!(test_node.rendered, true);
+        assert_eq!(test_node.borrow_mut().rendered, true);
     }
 }
