@@ -1,7 +1,5 @@
-use graphics::loader::Wavefront;
-mod graphics;
+//mod graphics;
+mod world;
 
 fn main() {
-    let obj = Wavefront::open(&Path::new("/tmp/derp.obj/untitled.obj"));
-    println!("{}", obj);
 }
