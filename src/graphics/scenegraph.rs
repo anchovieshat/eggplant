@@ -9,17 +9,23 @@ trait Render {
 struct Node {
     children: Vec<Box<Node>>,
     parent: Option<Box<Node>>,
-    object: Option<Rc<RefCell<Box<Render+'static>>>>,
+    object: Option<Box<Render+'static>>,
 }
 
-impl Render for Option<Rc<RefCell<Box<Render+'static>>>> {
+impl Render for Option<Box<Render+'static>> {
     fn render(&mut self) {
-        self.unwrap().borrow().render();
+        self.as_mut().unwrap().render()
+    }
+}
+
+impl<T: Render> Render for Rc<RefCell<Box<T>>> {
+    fn render(&mut self) {
+        self.borrow_mut().render()
     }
 }
 
 impl Node {
-    fn new(object: Rc<RefCell<Box<Render+'static>>>, parent: Option<Box<Node>>) -> Node {
+    fn new(object: Box<Render+'static>, parent: Option<Box<Node>>) -> Node {
         Node {
             parent: parent,
             children: Vec::new(),
@@ -28,7 +34,10 @@ impl Node {
     }
 
     fn insert(&mut self, child: Box<Node>) {
-        self.children.push(child);
+        match self.object {
+            Some(_) => self.children.push(child),
+            None => *self = *child,
+        }
     }
 
     fn render(&mut self) {
@@ -86,13 +95,13 @@ mod test {
     #[test]
     fn test_traversal() {
         let mut graph = SceneGraph::new(Default::default());
-        let testobj = box TestObj { rendered: false };
-        let mut obj = Rc::new(RefCell::new(testobj));
+        let testobj = Rc::new(RefCell::new(box TestObj { rendered: false }));
+        let testnode = box Node::new(box testobj.clone(), None);
 
-        graph.parent.insert(box Node::new(obj.clone(), None));
+        graph.parent.insert(testnode);
 
         graph.render();
 
-        assert_eq!(obj.borrow().rendered, true);
+        assert_eq!(testobj.borrow().rendered, true);
     }
 }
