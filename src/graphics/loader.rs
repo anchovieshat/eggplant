@@ -2,6 +2,9 @@ use std::io::{BufferedReader, File};
 use std::str;
 use std::fmt::{Show, Formatter, FormatError};
 use std::collections::HashMap;
+use gl;
+use super::mesh::{ToMesh, Mesh};
+use std::vec;
 
 struct Face {
     points: [Vertex3<u32>, ..3],
@@ -22,11 +25,45 @@ pub struct Vertex3<T> {
     z: T,
 }
 
+pub struct Vertex3Iter<'a, T: 'a> {
+    vt: &'a Vertex3<T>,
+    pos: uint,
+}
+
+impl<'a, T> Iterator<&'a T> for Vertex3Iter<'a, T> {
+    fn next(&mut self) -> Option<&'a T> {
+        self.pos += 1;
+        match self.pos {
+            1 => Some(&self.vt.x),
+            2 => Some(&self.vt.y),
+            3 => Some(&self.vt.z),
+            _ => None,
+        }
+    }
+}
+
 #[deriving(Show, Hash, PartialEq)]
 pub struct Vertex2<T> {
     u: T,
     v: T,
 }
+
+pub struct Vertex2Iter<'a, T: 'a> {
+    vt: &'a Vertex2<T>,
+    pos: uint,
+}
+
+impl<'a, T> Iterator<&'a T> for Vertex2Iter<'a, T> {
+    fn next(&mut self) -> Option<&'a T> {
+        self.pos += 1;
+        match self.pos {
+            1 => Some(&self.vt.u),
+            2 => Some(&self.vt.v),
+            _ => None,
+        }
+    }
+}
+
 
 impl<T: Num> Vertex3<T> {
     pub fn new(x: T, y: T, z: T) -> Vertex3<T> {
@@ -36,6 +73,14 @@ impl<T: Num> Vertex3<T> {
             z: z,
         }
     }
+
+    pub fn iter(&self) -> Vertex3Iter<T> {
+        Vertex3Iter { vt: self, pos: 0}
+    }
+
+    pub fn into_iter(self) -> vec::MoveItems<T> {
+        (vec!(self.x, self.y, self.z)).into_iter()
+    }
 }
 
 impl<T: Num> Vertex2<T> {
@@ -44,6 +89,14 @@ impl<T: Num> Vertex2<T> {
             u: u,
             v: v,
         }
+    }
+
+    pub fn iter(&self) -> Vertex2Iter<T> {
+        Vertex2Iter { vt: self, pos: 0}
+    }
+
+    pub fn into_iter(self) -> vec::MoveItems<T> {
+        (vec!(self.u, self.v)).into_iter()
     }
 }
 
@@ -57,6 +110,17 @@ pub struct Wavefront {
 impl Show for Wavefront {
     fn fmt(&self, f: &mut Formatter) -> Result<(), FormatError> {
         write!(f, "<Wavefront OBJ with {} verts ({} n, {} uv), and {} faces>", self.verts.len(), self.normals.len(), self.uvs.len(), self.faces.len())
+    }
+}
+
+impl ToMesh for Wavefront {
+    fn to_mesh(obj: Wavefront) -> Mesh {
+        let verts = obj.verts.into_iter().flat_map(|x| x.into_iter().map(|y| y as gl::types::GLfloat)).collect();
+        let uvs = obj.uvs.into_iter().flat_map(|x| x.into_iter().map(|y| y as gl::types::GLfloat)).collect();
+        let normals = obj.normals.into_iter().flat_map(|x| x.into_iter().map(|y| y as gl::types::GLfloat)).collect();
+        let indices = obj.faces.into_iter().map(|x| x as gl::types::GLint).collect();
+
+        Mesh::new(verts, uvs, normals, indices)
     }
 }
 
