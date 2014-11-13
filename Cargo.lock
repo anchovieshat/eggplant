@@ -2,9 +2,15 @@
 name = "eggplant"
 version = "0.0.1"
 dependencies = [
+ "cgmath 0.0.1 (git+http://github.com/bjz/cgmath-rs)",
  "gfx 0.1.0 (git+http://github.com/gfx-rs/gfx-rs)",
  "glfw 0.0.1 (git+https://github.com/bjz/glfw-rs.git)",
 ]
+
+[[package]]
+name = "cgmath"
+version = "0.0.1"
+source = "git+http://github.com/bjz/cgmath-rs#2fe17066b21949b03802a4af96aa7e5e4303bffc"
 
 [[package]]
 name = "device"

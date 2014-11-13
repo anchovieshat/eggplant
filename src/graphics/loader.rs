@@ -95,10 +95,10 @@ impl<T: Copy> Vertex2<T> {
 #[vertex_format]
 pub struct Vertex {
 
-    #[name = "pos"]
+    #[name = "a_Pos"]
     pos: [f32, ..3],
 
-    #[name = "uv"]
+    #[name = "a_TexCoord"]
     uv: [f32, ..2],
 
     #[name = "norm"]
@@ -173,9 +173,9 @@ impl Wavefront {
                         let norms = normals[point.z as uint];
                         let norm_arr = [norms.x, norms.y, norms.z];
                         obj.verts.push(Vertex {pos: pos_arr, uv: uv_arr, norm: norm_arr});
-                        let flen = obj.faces.len() as u32;
+                        let flen = obj.verts.len() as u32 -1;
                         obj.faces.push(flen);
-                        Some((obj.faces.len()-1) as u32)
+                        Some(flen)
                     }
                 };
                 idx.map(|x| map.insert((point.x, point.y, point.z), x));
@@ -183,6 +183,14 @@ impl Wavefront {
         }
 
         obj
+    }
+
+    pub fn vertex(&self) -> &Vec<Vertex> {
+        &self.verts
+    }
+
+    pub fn faces(&self) -> &Vec<u32> {
+        &self.faces
     }
 }
 

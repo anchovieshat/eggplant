@@ -9,3 +9,6 @@ git = "https://github.com/bjz/glfw-rs.git"
 
 [dependencies.gfx]
 git = "http://github.com/gfx-rs/gfx-rs"
+
+[dependencies.cgmath]
+git = "http://github.com/bjz/cgmath-rs"
