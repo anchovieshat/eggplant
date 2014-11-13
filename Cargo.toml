@@ -4,8 +4,8 @@ name = "eggplant"
 version = "0.0.1"
 authors = ["Colin Davidson <colrdavidson@gmail.com>"]
 
-#[dependencies.glfw]
-#git = "https://github.com/bjz/glfw-rs.git"
-#
-[dependencies.gl]
-git = "https://github.com/bjz/gl-rs.git"
+[dependencies.glfw]
+git = "https://github.com/bjz/glfw-rs.git"
+
+[dependencies.gfx]
+git = "http://github.com/gfx-rs/gfx-rs"

@@ -2,8 +2,8 @@ use std::io::{BufferedReader, File};
 use std::str;
 use std::fmt::{Show, Formatter, FormatError};
 use std::collections::HashMap;
-use gl;
-use super::mesh::{ToMesh, Mesh};
+use gfx_gl;
+//use super::mesh::{ToMesh, Mesh};
 use std::vec;
 
 struct Face {
@@ -92,27 +92,27 @@ impl<T: Copy> Vertex2<T> {
     }
 }
 
+#[vertex_format]
+pub struct Vertex {
+
+    #[name = "pos"]
+    pos: [f32, ..3],
+
+    #[name = "uv"]
+    uv: [f32, ..2],
+
+    #[name = "norm"]
+    norm: [f32, ..3],
+}
+
 pub struct Wavefront {
-    verts: Vec<Vertex3<f32>>,
-    uvs: Vec<Vertex2<f32>>,
-    normals: Vec<Vertex3<f32>>,
+    verts: Vec<Vertex>,
     faces: Vec<u32>,
 }
 
 impl Show for Wavefront {
     fn fmt(&self, f: &mut Formatter) -> Result<(), FormatError> {
-        write!(f, "<Wavefront OBJ with {} verts ({} n, {} uv), and {} faces>", self.verts.len(), self.normals.len(), self.uvs.len(), self.faces.len())
-    }
-}
-
-impl ToMesh for Wavefront {
-    fn to_mesh(obj: Wavefront) -> Mesh {
-        let verts = obj.verts.iter().flat_map(|x| x.iter().map(|y| y as gl::types::GLfloat)).collect();
-        let uvs = obj.uvs.iter().flat_map(|x| x.iter().map(|y| y as gl::types::GLfloat)).collect();
-        let normals = obj.normals.iter().flat_map(|x| x.iter().map(|y| y as gl::types::GLfloat)).collect();
-        let indices = obj.faces.iter().map(|&x| x as gl::types::GLint).collect();
-
-        Mesh::new(verts, uvs, normals, indices)
+        write!(f, "<Wavefront OBJ with {} verts and {} faces>", self.verts.len(), self.faces.len())
     }
 }
 
@@ -125,58 +125,60 @@ impl Wavefront {
 
         let mut reader = BufferedReader::new(file);
 
-        let mut verts_init = Vec::new();
-        let mut uvs_init = Vec::new();
-        let mut normals_init = Vec::new();
-        let mut faces_init = Vec::new();
-        let mut data_map = HashMap::new();
+        let mut verts = Vec::new();
+        let mut uvs = Vec::new();
+        let mut normals = Vec::new();
+        let mut faces = Vec::new();
+        let mut map = HashMap::new();
 
         for line in reader.lines() {
             let line = line.unwrap();
             let mut words = line.as_slice().words();
             match words.next().unwrap() {
-                "v" => verts_init.push(parse_vertex3(words)),
-                "vt" => uvs_init.push(parse_vertex2(words)),
-                "vn" => normals_init.push(parse_vertex3(words)),
-                "f" => faces_init.push(parse_face(words)),
+                "v" => verts.push(parse_vertex3(words)),
+                "vt" => uvs.push(parse_vertex2(words)),
+                "vn" => normals.push(parse_vertex3(words)),
+                "f" => faces.push(parse_face(words)),
                 _ => (),
             }
         }
 
-        if verts_init.len() == 0 {
-            verts_init.push(Vertex3::new(0.,0.,0.))
+        if verts.len() == 0 {
+            verts.push(Vertex3::new(0.,0.,0.))
         }
-        if uvs_init.len() == 0 {
-            uvs_init.push(Vertex2::new(0.,0.))
+        if uvs.len() == 0 {
+            uvs.push(Vertex2::new(0.,0.))
         }
-        if normals_init.len() == 0 {
-            normals_init.push(Vertex3::new(0.,0.,0.))
+        if normals.len() == 0 {
+            normals.push(Vertex3::new(0.,0.,0.))
         }
 
         let mut obj = Wavefront {
             verts: Vec::new(),
-            uvs: Vec::new(),
-            normals: Vec::new(),
             faces: Vec::new(),
         };
 
-        for face in faces_init.iter() {
+        for face in faces.iter() {
             for point in face.points.iter() {
-                let idx = match data_map.find(&(point.x, point.y, point.z)) {
+                let idx = match map.find(&(point.x, point.y, point.z)) {
                     Some(&index) => {
                         obj.faces.push(index);
                         None
                     }
                     None => {
-                        obj.verts.push(verts_init[point.x as uint]);
-                        obj.uvs.push(uvs_init[point.y as uint]);
-                        obj.normals.push(normals_init[point.z as uint]);
+                        let pos = verts[point.x as uint];
+                        let pos_arr = [pos.x, pos.y, pos.z];
+                        let uv = uvs[point.y as uint];
+                        let uv_arr = [uv.u, uv.v];
+                        let norms = normals[point.z as uint];
+                        let norm_arr = [norms.x, norms.y, norms.z];
+                        obj.verts.push(Vertex {pos: pos_arr, uv: uv_arr, norm: norm_arr});
                         let flen = obj.faces.len() as u32;
                         obj.faces.push(flen);
                         Some((obj.faces.len()-1) as u32)
                     }
                 };
-                idx.map(|x| data_map.insert((point.x, point.y, point.z), x));
+                idx.map(|x| map.insert((point.x, point.y, point.z), x));
             }
         }
 

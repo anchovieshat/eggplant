@@ -1,3 +1,4 @@
 pub mod loader;
-//pub mod scenegraph;
-pub mod mesh;
+pub mod render;
+pub mod scenegraph;
+//pub mod mesh;

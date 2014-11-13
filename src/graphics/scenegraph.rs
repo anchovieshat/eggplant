@@ -1,9 +1,10 @@
 use std::default::Default;
 use std::rc::Rc;
 use std::cell::RefCell;
+use super::render::RenderManager;
 
 trait Render {
-    fn render(&mut self);
+    fn render(&mut self, rm: &mut RenderManager);
 }
 
 struct Dummy;
@@ -13,35 +14,22 @@ impl Dummy {
 }
 
 impl Render for Dummy {
-    fn render(&mut self) { }
-}
-
-struct Node {
-    id: u32,
-    children: Vec<Rc<RefCell<Node>>>,
-    object: Box<Render+'static>,
-}
-
-impl PartialEq for Node {
-    fn eq(&self, other: &Node) -> bool {
-        self.id == other.id
-    }
+    fn render(&mut self, rm: &mut RenderManager) { }
 }
 
 impl Render for Option<Box<Render+'static>> {
-    fn render(&mut self) {
-        self.as_mut().unwrap().render()
+    fn render(&mut self, rm: &mut RenderManager) {
+        self.as_mut().unwrap().render(rm)
     }
 }
 
 impl<T: Render> Render for Rc<RefCell<Box<T>>> {
-    fn render(&mut self) {
-        self.borrow_mut().render()
+    fn render(&mut self, rm: &mut RenderManager) {
+        self.borrow_mut().render(rm)
     }
 }
 
 static mut NODE_ID: u32 = 0;
-
 
 fn incr_node_id() {
     unsafe {
@@ -53,6 +41,12 @@ fn get_node_id() -> u32 {
     unsafe {
         NODE_ID
     }
+}
+
+struct Node {
+    id: u32,
+    children: Vec<Rc<RefCell<Node>>>,
+    object: Box<Render+'static>,
 }
 
 impl Node {
@@ -69,10 +63,10 @@ impl Node {
         self.children.push(child);
     }
 
-    fn render(&mut self) {
-        self.object.render();
+    fn render(&mut self, rm: &mut RenderManager) {
+        self.object.render(rm);
         for child in self.children.iter_mut() {
-            child.borrow_mut().render();
+            child.borrow_mut().render(rm);
         }
     }
 
@@ -83,6 +77,12 @@ impl Node {
             }
         }
         None
+    }
+}
+
+impl PartialEq for Node {
+    fn eq(&self, other: &Node) -> bool {
+        self.id == other.id
     }
 }
 
@@ -108,8 +108,8 @@ impl SceneGraph {
         }
     }
 
-    fn render(&mut self) {
-        self.parent.render();
+    fn render(&mut self, rm: &mut RenderManager) {
+        self.parent.render(rm);
     }
 }
 
@@ -122,13 +122,14 @@ mod test {
     use std::boxed::BoxAny;
     use std::rc::Rc;
     use std::cell::RefCell;
+    use super::super::render::RenderManager;
 
     struct TestObj {
         rendered: bool,
     }
 
     impl Render for TestObj {
-        fn render(&mut self) { self.rendered = true; }
+        fn render(&mut self, rm: &mut RenderManager) { self.rendered = true; }
     }
 
     impl Default for TestObj {
@@ -148,7 +149,8 @@ mod test {
 
         graph.parent.insert(testnode);
 
-        graph.render();
+        let mut rm = RenderManager::new();
+        graph.render(&mut rm);
 
         assert_eq!(testobj.borrow().rendered, true);
     }
