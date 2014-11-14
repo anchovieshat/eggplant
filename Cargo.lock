@@ -5,6 +5,7 @@ dependencies = [
  "cgmath 0.0.1 (git+http://github.com/bjz/cgmath-rs)",
  "gfx 0.1.0 (git+http://github.com/gfx-rs/gfx-rs)",
  "glfw 0.0.1 (git+https://github.com/bjz/glfw-rs.git)",
+ "rust-hl-lua 0.1.0 (git+https://github.com/tomaka/rust-hl-lua)",
 ]
 
 [[package]]
@@ -84,6 +85,11 @@ source = "git+http://github.com/gfx-rs/gfx-rs#8c30d07565fcde68a95389ab6baf0e49e0
 dependencies = [
  "device 0.1.0 (git+http://github.com/gfx-rs/gfx-rs)",
 ]
+
+[[package]]
+name = "rust-hl-lua"
+version = "0.1.0"
+source = "git+https://github.com/tomaka/rust-hl-lua#74d656413b5d919ff9405f9a4feff918a8e19440"
 
 [[package]]
 name = "rust-xml"
