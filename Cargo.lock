@@ -5,18 +5,17 @@ dependencies = [
  "cgmath 0.0.1 (git+http://github.com/bjz/cgmath-rs)",
  "gfx 0.1.0 (git+http://github.com/gfx-rs/gfx-rs)",
  "glfw 0.0.1 (git+https://github.com/bjz/glfw-rs.git)",
- "rust-hl-lua 0.1.0 (git+https://github.com/tomaka/rust-hl-lua)",
 ]
 
 [[package]]
 name = "cgmath"
 version = "0.0.1"
-source = "git+http://github.com/bjz/cgmath-rs#2fe17066b21949b03802a4af96aa7e5e4303bffc"
+source = "git+http://github.com/bjz/cgmath-rs#ce4ec6279860e1e5bfacf972391188c1c8fa380d"
 
 [[package]]
 name = "device"
 version = "0.1.0"
-source = "git+http://github.com/gfx-rs/gfx-rs#8c30d07565fcde68a95389ab6baf0e49e0b30c7d"
+source = "git+http://github.com/gfx-rs/gfx-rs#d0ed89bd7745bdfeaaca04b1589c8931ff702853"
 dependencies = [
  "gfx_gl 0.1.0 (git+https://github.com/gfx-rs/gfx_gl.git)",
 ]
@@ -24,7 +23,7 @@ dependencies = [
 [[package]]
 name = "gfx"
 version = "0.1.0"
-source = "git+http://github.com/gfx-rs/gfx-rs#8c30d07565fcde68a95389ab6baf0e49e0b30c7d"
+source = "git+http://github.com/gfx-rs/gfx-rs#d0ed89bd7745bdfeaaca04b1589c8931ff702853"
 dependencies = [
  "device 0.1.0 (git+http://github.com/gfx-rs/gfx-rs)",
  "gfx_macros 0.1.0 (git+http://github.com/gfx-rs/gfx-rs)",
@@ -42,7 +41,7 @@ dependencies = [
 [[package]]
 name = "gfx_macros"
 version = "0.1.0"
-source = "git+http://github.com/gfx-rs/gfx-rs#8c30d07565fcde68a95389ab6baf0e49e0b30c7d"
+source = "git+http://github.com/gfx-rs/gfx-rs#d0ed89bd7745bdfeaaca04b1589c8931ff702853"
 
 [[package]]
 name = "gl_common"
@@ -81,15 +80,10 @@ source = "git+https://github.com/bjz/gl-rs.git#218f14c94d79331fc5487f8564dc71f7e
 [[package]]
 name = "render"
 version = "0.1.0"
-source = "git+http://github.com/gfx-rs/gfx-rs#8c30d07565fcde68a95389ab6baf0e49e0b30c7d"
+source = "git+http://github.com/gfx-rs/gfx-rs#d0ed89bd7745bdfeaaca04b1589c8931ff702853"
 dependencies = [
  "device 0.1.0 (git+http://github.com/gfx-rs/gfx-rs)",
 ]
-
-[[package]]
-name = "rust-hl-lua"
-version = "0.1.0"
-source = "git+https://github.com/tomaka/rust-hl-lua#74d656413b5d919ff9405f9a4feff918a8e19440"
 
 [[package]]
 name = "rust-xml"

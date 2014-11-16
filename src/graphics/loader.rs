@@ -2,9 +2,6 @@ use std::io::{BufferedReader, File};
 use std::str;
 use std::fmt::{Show, Formatter, FormatError};
 use std::collections::HashMap;
-use gfx_gl;
-//use super::mesh::{ToMesh, Mesh};
-use std::vec;
 
 struct Face {
     points: [Vertex3<u32>, ..3],
@@ -25,45 +22,11 @@ pub struct Vertex3<T: Copy> {
     z: T,
 }
 
-pub struct Vertex3Iter<T: Copy> {
-    vt: Vertex3<T>,
-    pos: uint,
-}
-
-impl<T: Copy> Iterator<T> for Vertex3Iter<T> {
-    fn next(&mut self) -> Option<T> {
-        self.pos += 1;
-        match self.pos {
-            1 => Some(self.vt.x),
-            2 => Some(self.vt.y),
-            3 => Some(self.vt.z),
-            _ => None,
-        }
-    }
-}
-
 #[deriving(Show, Hash, PartialEq)]
 pub struct Vertex2<T: Copy> {
     u: T,
     v: T,
 }
-
-pub struct Vertex2Iter<T: Copy> {
-    vt: Vertex2<T>,
-    pos: uint,
-}
-
-impl<T: Copy> Iterator<T> for Vertex2Iter<T> {
-    fn next(&mut self) -> Option<T> {
-        self.pos += 1;
-        match self.pos {
-            1 => Some(self.vt.u),
-            2 => Some(self.vt.v),
-            _ => None,
-        }
-    }
-}
-
 
 impl<T: Copy> Vertex3<T> {
     pub fn new(x: T, y: T, z: T) -> Vertex3<T> {
@@ -73,10 +36,6 @@ impl<T: Copy> Vertex3<T> {
             z: z,
         }
     }
-
-    pub fn iter(self) -> Vertex3Iter<T> {
-        Vertex3Iter { vt: self, pos: 0}
-    }
 }
 
 impl<T: Copy> Vertex2<T> {
@@ -85,10 +44,6 @@ impl<T: Copy> Vertex2<T> {
             u: u,
             v: v,
         }
-    }
-
-    pub fn iter(self) -> Vertex2Iter<T> {
-        Vertex2Iter { vt: self, pos: 0}
     }
 }
 
@@ -160,7 +115,7 @@ impl Wavefront {
 
         for face in faces.iter() {
             for point in face.points.iter() {
-                let idx = match map.find(&(point.x, point.y, point.z)) {
+                let idx = match map.get(&(point.x, point.y, point.z)) {
                     Some(&index) => {
                         obj.faces.push(index);
                         None

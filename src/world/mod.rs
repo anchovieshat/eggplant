@@ -1,10 +1,8 @@
-struct Vector {
-    x: f32,
-    y: f32,
-    z: f32,
+pub enum Attribute {
+    Vec3F((f32,f32,f32)),
+    Bool(bool),
 }
 
 trait Object {
-    fn position(&self) -> Vector;
-    fn set_position(&self, Vector);
+    fn attributes(&self) -> &HashMap<&str, Attribute>;
 }

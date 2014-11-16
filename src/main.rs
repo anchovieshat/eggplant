@@ -5,7 +5,6 @@ extern crate gfx;
 extern crate gfx_macros;
 extern crate gfx_gl;
 extern crate glfw;
-extern crate time;
 
 use cgmath::{FixedArray, Matrix, Point3, Vector3, Transform, AffineMatrix3};
 use gfx::{Device, DeviceHelper, ToSlice};
